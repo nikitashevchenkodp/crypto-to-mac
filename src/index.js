@@ -13,5 +13,5 @@ ReactDOM.render(
     </CryptoContext>
 ,
   document.getElementById("root")
-);
+)
 
