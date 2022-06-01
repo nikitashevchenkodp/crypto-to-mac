@@ -1,13 +1,16 @@
-import { createTheme, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography } from '@mui/material'
+import { Box, Container, createTheme, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import CurrencyApiService from '../config/curency-api-service'
+import { useHistory } from 'react-router-dom/cjs/react-router-dom.min'
 import { CryptoState } from '../crypto-context'
 
 
 const PortfolioPage = () => {
  
-    const {watchlist, coins, loading, symbol, currencyRate} = CryptoState()
+    const {watchlist, coins, loading, symbol, currencyRate, transactions} = CryptoState()
+    const [portfolio, setPortfolio] = useState([])
 
+    console.log(portfolio);
+    const history = useHistory()
     const findPortfolio = (watchlist, coins) => {
         let res = []
         for(let i = 0; i < coins.length; i++) {
@@ -22,9 +25,29 @@ const PortfolioPage = () => {
                 }
             }
         }
-        return res
+        setPortfolio(res)
     }
 
+    useEffect(() => {
+      findPortfolio(watchlist, coins)
+
+    },[watchlist, coins])
+
+    const countTotalSum = (portfolio) => {
+      const res = portfolio.reduce((pv, port) => pv + (port.current_price * port.quantity), 0)
+      return res
+    }
+
+    const countPercentageChange = (transactions) => {
+      const sumAllTransactions = transactions.reduce((pv, tran) => pv + (tran.price * tran.quantity), 0)
+      const sumPortfolio = countTotalSum(portfolio)
+      const percentage = ((sumPortfolio / sumAllTransactions) - 1) * 100
+      const different = sumPortfolio - sumAllTransactions
+      return [percentage, different]
+    }
+
+    const [percentage, different] = countPercentageChange(transactions)
+  
 
     const numberWithCommas = (x) => {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -104,14 +127,46 @@ const PortfolioPage = () => {
         )
     }  
   return (
-    <div>
         <ThemeProvider theme={darkTheme}>
+          <Container>
         <Typography 
             variant='h3'
             pl={"50px"}
             sx={{fontWeight: 700, paddingBottom: "40px", paddingTop: "20px", textAlign: "center"}}>
             Your Portfolio
         </Typography>
+        <div style={{display: "flex"}}>
+        <Box
+          sx={{
+            marginBottom: "30px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "20px",
+            width: "33%",
+            backgroundColor: 'transparent',
+            borderRadius: "19px",
+            boxShadow: "rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;"
+          }}
+        >
+         <div style = {{display: "flex", flexDirection: "column"}}> 
+          <span style={{color: "darkgrey", marginBottom: "8px", fontSize: "18px"}}>
+            Current balance
+          </span>
+          <span style={{marginBottom: "5px", fontSize: "20px"}}>
+            $ {numberWithCommas(countTotalSum(portfolio).toFixed(2))}
+          </span>
+          <span style={{color: different > 0 ? "green" : "red", marginBottom: "8px", fontSize: "18px"}}>
+            {different.toFixed(2)} $
+          </span>
+         </div>
+         <div>
+           <span style={{backgroundColor: percentage > 0 ? "rgba(0, 255, 0, 0.3)" : "rgba(212, 8, 8, 0.3)", borderRadius: "15px", padding: "3px 6px"}}>{percentage.toFixed(2)}%</span>
+         </div>
+        </Box>
+
+        </div>
+
         <TableContainer>
           {
             loading ?  (
@@ -131,13 +186,13 @@ const PortfolioPage = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {findPortfolio(watchlist, coins).map(row => {
-                      console.log(row);
+                  {portfolio.map(row => {
                     const profit = row.price_change_percentage_24h > 0;
                     return (
                       <TableRow
                         key = {row.name}
                         sx = {classes.row}
+                        onClick = {() => history.push(`/portfolio/${row.id}`)}
                       >
                         <TableCell component="th" scope="row"
                           sx = {classes.tableBodyCell}>
@@ -190,8 +245,8 @@ const PortfolioPage = () => {
             )
           }
         </TableContainer>
+        </Container>
     </ThemeProvider>
-    </div>
   )
 }
 
