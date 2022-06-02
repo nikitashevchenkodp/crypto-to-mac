@@ -16,3 +16,5 @@ export const chartDays = [
     value: 365,
   },
 ];
+
+export const namesOfTableHead = ["Coin", "Price", "Quantity", "Mid Price"]

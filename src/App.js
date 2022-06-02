@@ -8,8 +8,9 @@ import HomePage from './pages/home-page';
 import { BrowserRouter as Router } from 'react-router-dom';
 import Alert from './components/alert';
 
-import PortfolioCoinPage from './pages/portfolio-coin-page';
-import PortfolioPage from './pages/portfolio-page';
+import PortfolioPage from './pages/portfolio-page/portfolio-page';
+import PortfolioCoinPage from './pages/portfolio-coin-page/portfolio-coin-page';
+
 
 
 function App() {
