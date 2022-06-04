@@ -36,7 +36,8 @@ const styles = {
 
 const button = {
   padding: "10px 15px",
-  backgroundColor: "#EEBC1D"
+  backgroundColor: "#EEBC1D",
+  width: "100%"
       
 }
 
@@ -82,10 +83,10 @@ const TradeWindow = ({coin}) => {
           <Box sx={styles.style}>
             <Tabs sx={styles.tabs} value={value} onChange={handleChange} aria-label="basic tabs example">
               <Tab sx={styles.tab} label="Buy"  />
-              <Tab sx={styles.tab} label="Sels"  />
+              <Tab sx={styles.tab} label="Sell"  />
             </Tabs>
             {value == 0 && <Buy coin = {coin} handleClose = {handleClose}/>}
-            {value == 1 && <Sell />}
+            {value == 1 && <Sell coin = {coin} handleClose = {handleClose} />}
 
           </Box>
         </Fade>

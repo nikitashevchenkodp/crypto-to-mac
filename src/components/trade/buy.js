@@ -37,21 +37,21 @@ const Buy = ({coin, handleClose}) => {
     const [count, setCount] = useState(0)
     const [base, setBase] = useState('USD')
     let isNotUsd = currency !== "USD"
-    
+    console.log(coin);
     const toPortfolio = async () => {
         
         const quantity = base === 'USD' ? +total : +count
+        const price = coin?.market_data.current_price['usd'] 
+                                  
 
-        console.log('quantity', quantity);
-        let transaction = {
+        let transactionToPortfolio = {
             id: coin.id,
             quantity,
             coin: coin.name,
-            midPrice: isNotUsd ? (coin?.market_data.current_price[currency.toLowerCase()] / currencyRate) : coin?.market_data.current_price[currency.toLowerCase()]
+            midPrice: price
         }
-        const price = isNotUsd ? coin?.market_data.current_price[currency.toLowerCase()] / currencyRate : coin?.market_data.current_price[currency.toLowerCase()]
-        const transactionDetails = {
-          ...transaction,
+        const transactionToTransactions = {
+          ...transactionToPortfolio,
           currency: currency,
           midPrice: null,
           price: price ,
@@ -60,24 +60,23 @@ const Buy = ({coin, handleClose}) => {
           type: 'buy'
       }
 
-      const midPrice = countMidPrice(transactions,transactionDetails,coin)
+      const midPrice = countMidPrice(transactions,transactionToTransactions,coin)
 
       const idx = watchlist.findIndex((elem) => elem.coin == coin.name)
       let newPortfolio = []
       if (idx > -1) {
-          transaction = {
+          transactionToPortfolio = {
               ...watchlist[idx],
-              currency: currency,
               midPrice: midPrice,
               quantity: watchlist[idx].quantity + quantity
           }
           newPortfolio = [
               ...watchlist.slice(0, idx),
-              transaction,
+              transactionToPortfolio,
               ...watchlist.slice(idx+1)
           ]
       } else {
-          newPortfolio = [...watchlist, transaction]
+          newPortfolio = [...watchlist, transactionToPortfolio]
       }
 
       const coinRef = doc(db, user?.uid, "portfolio") 
@@ -85,8 +84,8 @@ const Buy = ({coin, handleClose}) => {
       
       try{
           await setDoc(coinRef,
-          {coins: watchlist ? newPortfolio : [transaction],
-          transactions: transactions ? [...transactions, transactionDetails] : [transactionDetails]},
+          {coins: watchlist ? newPortfolio : [transactionToPortfolio],
+          transactions: transactions ? [...transactions, transactionToTransactions] : [transactionToTransactions]},
           )
   
           setAlert({
@@ -149,7 +148,7 @@ const Buy = ({coin, handleClose}) => {
         sx={classes.btn}
         onClick = {toPortfolio}
         >
-          Confirm
+          BUY
       </Button>
     </Box>
   )

@@ -1,25 +1,30 @@
 import { Box, Container, createTheme, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min'
+import PieChart from '../../components/pie-chart'
 import { namesOfTableHead } from '../../config/data'
 import { countPercentageChange, countTotalSum, findPortfolio, numberWithCommas } from '../../config/utils'
 import { CryptoState } from '../../crypto-context'
 import { classes } from './portfolio-page-styles'
+import {BsBriefcase} from 'react-icons/bs'
 
 
 const PortfolioPage = () => {
 
-  const { watchlist, coins, symbol,loading, currencyRate, transactions } = CryptoState()
+  const { watchlist, coins, symbol, loading, currencyRate, transactions, fetchCoins, currency } = CryptoState()
   const [portfolio, setPortfolio] = useState([])
   const history = useHistory()
 
+  useEffect(() => {
+    fetchCoins()
+  }, [currency])
 
   useEffect(() => {
     setPortfolio(findPortfolio(watchlist, coins))
   }, [watchlist, coins])
 
   const [percentage, different] = countPercentageChange(transactions, portfolio, currencyRate)
-  const formatTotalSum = numberWithCommas(countTotalSum(portfolio).toFixed(2))
+  const formatTotalSum = numberWithCommas(countTotalSum(portfolio, currencyRate).toFixed(2))
   const formatDifferent = numberWithCommas(different.toFixed(2))
 
   const darkTheme = createTheme({
@@ -33,8 +38,9 @@ const PortfolioPage = () => {
 
   if (watchlist.length == 0) {
     return (
-      <div>
-        Your Portfolio is empty
+      <div style={{textAlign: "center", marginTop: "150px"}}>
+        <Typography variant='h3' sx={{fontWeight: "700", marginBottom: "20px"}}>Your Portfolio is Empty</Typography>
+        <BsBriefcase size={200} color={"gold"}/>
       </div>
     )
   }
@@ -48,24 +54,30 @@ const PortfolioPage = () => {
         >
           Your Portfolio
         </Typography>
-        <Box
-          sx={classes.mainBox}
-        >
-          <div style={classes.windowDiv}>
-            <span style={classes.currentBalance}>
-              Current balance
-            </span>
-            <span style={classes.totalSum}>
-              $ {formatTotalSum}
-            </span>
-            <span style={{ color: different > 0 ? "green" : "red", marginBottom: "8px", fontSize: "18px" }}>
-              {formatDifferent} $
-            </span>
+        <div style={{ display: "flex" , marginBottom: "20px"}}>
+          <Box
+            sx={classes.mainBox}
+          >
+            <div style={classes.windowDiv}>
+              <span style={classes.currentBalance}>
+                Current balance
+              </span>
+              <span style={classes.totalSum}>
+                $ {formatTotalSum} {symbol}
+              </span>
+
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <span style={{ backgroundColor: percentage > 0 ? "rgba(0, 255, 0, 0.3)" : "rgba(212, 8, 8, 0.3)", borderRadius: "15px", padding: "3px 6px", marginBottom: "5px", display: "inline-block" }}>{percentage.toFixed(2)}%</span>
+              <span style={{ color: different > 0 ? "green" : "red", marginBottom: "8px", fontSize: "18px", display: "block" }}>
+                {formatDifferent} {symbol}
+              </span>
+            </div>
+          </Box>
+          <div style={{ position: "relative", height: "40vh", width: "80vw" }}>
+            <PieChart />
           </div>
-          <div>
-            <span style={{ backgroundColor: percentage > 0 ? "rgba(0, 255, 0, 0.3)" : "rgba(212, 8, 8, 0.3)", borderRadius: "15px", padding: "3px 6px" }}>{percentage.toFixed(2)}%</span>
-          </div>
-        </Box>
+        </div>
         <TableContainer>
           {
             loading ? (
@@ -110,7 +122,7 @@ const PortfolioPage = () => {
                           <div style={classes.currentPrice}>
                             <div>
                               {symbol} {" "}
-                              {numberWithCommas(row.current_price.toFixed(2))}
+                              {numberWithCommas((row.current_price * currencyRate).toFixed(2))}
                             </div >
                             <span style={{
                               color: isGrowth > 0 ? "rgb(14, 203, 129)" : "red",
@@ -120,7 +132,7 @@ const PortfolioPage = () => {
                         </TableCell>
                         <TableCell
                           align='right'
-                          sx={{fontWeight: 500}}>
+                          sx={{ fontWeight: 500 }}>
                           {row.quantity.toFixed(4)} {row.symbol.toUpperCase()}
                         </TableCell>
                         <TableCell align="right">
@@ -131,7 +143,7 @@ const PortfolioPage = () => {
                           <span style={{
                             color: isProfit ? "rgb(14, 203, 129)" : "red",
                             fontWeight: 500,
-                          }}>{isProfit ? `+${((1 - ((row.midPrice * currencyRate) / row.current_price)) * 100).toFixed(4)}` : `-${((((row.midPrice * currencyRate) / row.current_price) - 1) * 100).toFixed(4)}`}</span>
+                          }}>{isProfit ? `+${((1 - ((row.midPrice * currencyRate) / (row.current_price * currencyRate))) * 100).toFixed(2)}` : `${((1 - ((row.midPrice * currencyRate) / (row.current_price * currencyRate))) * 100).toFixed(2)}`}</span>
                         </TableCell>
                       </TableRow>
                     )

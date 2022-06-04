@@ -13,7 +13,7 @@ import TradeWindow from '../components/trade/trade-window'
 const CoinPage = () => {
 
   const {id} = useParams()
-  const {symbol, currency, user, watchlist, setAlert} = CryptoState()
+  const {symbol, currency, user, watchlist, setAlert, currencyRate} = CryptoState()
   const [coin, setCoin] = useState()
   const [loading, setLoading] = useState(false)
 
@@ -145,7 +145,7 @@ const CoinPage = () => {
             &nbsp;&nbsp;
             <Typography variant='h5' sx={{fontFamily: "Montserrat"}}>
               {symbol}{" "}
-              {numberWithCommas(coin?.market_data.current_price[currency.toLowerCase()])}
+              {numberWithCommas(coin?.market_data.current_price['usd'] * currencyRate)}
             </Typography>
           </span>
 
@@ -156,7 +156,7 @@ const CoinPage = () => {
             &nbsp;&nbsp;
             <Typography variant='h5' sx={{fontFamily: "Montserrat"}}>
               {symbol}{" "}
-              {numberWithCommas(coin?.market_data.market_cap[currency.toLowerCase()]
+              {numberWithCommas((coin?.market_data.market_cap['usd'] * currencyRate)
                                 .toString().slice(0, -6))}
               M
             </Typography>

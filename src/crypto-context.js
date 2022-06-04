@@ -79,15 +79,16 @@ const CryptoContext = ({children}) => {
   }, [])
 
   useEffect(() => {
-    fetchCoins()
-    currencyApi.getCurrency(currency)
-        .then(res => setCurrencyRate(res[`USD${currency}`]))
+    if(currency === "USD") setCurrencyRate(1)
+    else if(currency === "UAH") setCurrencyRate(29.53066)
+    // currencyApi.getCurrency(currency)
+    //     .then(res => setCurrencyRate(res[`USD${currency}`]))
   }, [currency])
 
 
   const fetchCoins = async () => {
     setLoading(true)
-    const res = await fetch(CoinList(currency))
+    const res = await fetch(CoinList("USD"))
     res.json().then(data => setCoins(data))
     setLoading(false)
   }

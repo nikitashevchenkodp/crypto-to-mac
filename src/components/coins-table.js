@@ -4,12 +4,11 @@ import { Container } from '@mui/system'
 import React from 'react'
 import { useEffect,useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import { CoinList } from '../config/api'
 import { CryptoState } from '../crypto-context'
 
 const CoinsTable = () => {
 
-  const {currency, symbol, coins, loading, fetchCoins} = CryptoState()
+  const {currency, symbol, coins, loading, fetchCoins, currencyRate} = CryptoState()
   const history = useHistory()
 
 
@@ -20,6 +19,11 @@ const CoinsTable = () => {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
+  const convertingCoins = (coins, currencyRate) => {
+    return coins.map((coin) => coin = {...coin, current_price: coin.current_price * currencyRate})
+  }
+
+  console.log(convertingCoins(coins, currencyRate));
   
   const classes = {
     container: {
@@ -79,7 +83,7 @@ const CoinsTable = () => {
 
   
   const handleSearch = () => {
-    return coins.filter((coin) => 
+    return convertingCoins(coins, currencyRate).filter((coin) => 
       coin.name.toLowerCase().includes(search) ||
       coin.symbol.toLowerCase().includes(search) 
     )
@@ -139,6 +143,7 @@ const CoinsTable = () => {
                   {handleSearch().slice((page-1) * 10, (page-1) * 10 + 10)
                                     .map(row => {
                     const profit = row.price_change_percentage_24h > 0;
+                    console.log(row.name,row.price_change_percentage_24h);
 
                     return (
                       <TableRow

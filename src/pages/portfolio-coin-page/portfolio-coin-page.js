@@ -1,16 +1,19 @@
-import { Container, createTheme, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography } from '@mui/material'
-import { Box } from '@mui/system'
+import { Button, Container, createTheme, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography } from '@mui/material'
+import { Box, width } from '@mui/system'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { SingleCoin } from '../../config/api'
-import CurrencyApiService from '../../config/curency-api-service'
 import { CryptoState } from '../../crypto-context'
 import {BsFillArrowDownCircleFill} from 'react-icons/bs'
-import { numberWithCommas } from '../../config/utils'
+import { countTotalSum, findPortfolio, numberWithCommas } from '../../config/utils'
+import TradeWindow from '../../components/trade/trade-window'
+import { doc, setDoc } from 'firebase/firestore'
+import { db } from '../../firebase'
+import { useHistory } from 'react-router-dom'
 
 const styles = {
   coinBox: {
-    margin: "15px",
+    marginBottom: "20px",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -41,9 +44,14 @@ const styles = {
   changes: { 
     borderRadius: "15px",
     padding: "3px 6px" 
+  },
+  button : {
+    width: "100%",
+    height: "40px",
+    backgroundColor: "#ff0000",
+    color: "black",
+    marginTop: "15px"
   }
-
-
 
 }
 
@@ -57,10 +65,13 @@ const countCoinSum = (transactions, coin, currencyRate) => {
   
 
 const PortfolioCoinPage = () => {
-
-  const { watchlist, currency, transactions, currencyRate } = CryptoState()
+  console.log("render");
+  const { watchlist, currency, transactions, currencyRate, symbol, coins, user, setAlert} = CryptoState()
   const [coin, setCoin] = useState()
+  const [page, setPage] = useState(5)
   const { id } = useParams()
+
+  const history = useHistory()
 
   const fetchCoin = async () => {
     const res = await fetch(SingleCoin(id))
@@ -69,21 +80,53 @@ const PortfolioCoinPage = () => {
 
   useEffect(() => {
     fetchCoin()
-  }, [])
+    console.log("fetch");
+  }, [currency])
 
   
 
   const coinInPortfolio = watchlist.filter((watch) => watch.coin === coin?.name)
   //Total sum of this coin i portfolio
-  const actualTotalSum = coinInPortfolio[0]?.quantity * coin?.market_data.current_price[currency.toLowerCase()]
+  const actualTotalSum = coinInPortfolio[0]?.quantity * (coin?.market_data.current_price['usd'] * currencyRate)
+
+  const findPartOfPortfolio = () => {
+    const total = countTotalSum(findPortfolio(watchlist, coins), currencyRate)
+    const res = (actualTotalSum / total) * 100 
+    return res
+  }
 
   const [sumCoinTransactions, findTransactions] = countCoinSum(transactions, coin, currencyRate)
   //Percentage change this coin in portfolio
-  const countCoinChangePercentage = ((actualTotalSum / sumCoinTransactions) - 1) * 100
+  const countCoinChangePercentage = (1 - ((coinInPortfolio[0]?.quantity * coinInPortfolio[0]?.midPrice * currencyRate) / actualTotalSum)) * 100
 
-  //Percentage chenge this coin on market
-  const calculatePercentageChange = coinInPortfolio[0]?.midPrice < coin?.market_data.current_price[currency.toLowerCase()] ? `+${((1 - ((coinInPortfolio[0]?.midPrice * currencyRate) / coin?.market_data.current_price[currency.toLowerCase()])) * 100).toFixed(4)}` : `-${((((coinInPortfolio[0]?.midPrice * currencyRate) / coin?.market_data.current_price[currency.toLowerCase()]) - 1) * 100).toFixed(4)}`
+  const deleteCoin = async () => {
+    const newPortfolio = watchlist.filter((item) => item.id !== coin.id)
+    console.log(newPortfolio);
+    console.log(transactions);
+    const newTransactions = transactions.filter((item) => item.id !== coin.id)
+    console.log(newTransactions);
 
+    const coinRef = doc(db, user?.uid, "portfolio")
+
+    try {
+      await setDoc(coinRef,{
+          coins: newPortfolio,
+          transactions: newTransactions
+        })
+        setAlert({
+          open: true,
+          message: `${coin.name} deleted from Portfolio`,
+          type: "success"
+      })
+      history.push('/portfolio')
+    } catch(error) {
+      setAlert({
+        open: true,
+        message: error,
+        type: "error"
+      })
+    }
+  }
 
   const darkTheme = createTheme({
     palette: {
@@ -94,13 +137,13 @@ const PortfolioCoinPage = () => {
     },
   })
 
-
+  console.log(coin?.market_data.price_change_percentage_24h.toFixed(2));
 
   return (
     <>
       <ThemeProvider theme={darkTheme}>
         <Container sx={styles.container}>
-          <div style={{padding: "15px"}}>
+          <div style={{padding: "15px", width: "40%"}}>
             <Box sx={styles.coinBox}>
               <div style={styles.coinContainer} >
                 <div style={styles.coinDiv}>
@@ -115,25 +158,46 @@ const PortfolioCoinPage = () => {
                   </div>
                 </div>
                 <span style={{ fontSize: "20px", marginBottom: "8px"}}>
-                  $ {numberWithCommas(actualTotalSum.toFixed(2))}
+                  {symbol} {numberWithCommas(actualTotalSum.toFixed(2))}
                 </span>
                 <span style={{ textAlign: "left"}}>
-                  {coinInPortfolio[0]?.quantity.toFixed(4)}
+                  {coinInPortfolio[0]?.quantity.toFixed(4)} {coin?.symbol.toUpperCase()}
                 </span>
               </div>
               <div>
-                <span style={{...styles.changes, backgroundColor: calculatePercentageChange > 0 ? "rgba(0, 255, 0, 0.3)" : "rgba(212, 8, 8, 0.3)"}}>{calculatePercentageChange}%</span>
+                <span style={{...styles.changes, backgroundColor: coin?.market_data.price_change_percentage_24h > 0 ? "rgba(0, 255, 0, 0.3)" : "rgba(212, 8, 8, 0.3)"}}>{coin?.market_data.price_change_percentage_24h.toFixed(2)}%</span>
               </div>
             </Box>
             <Box sx={styles.coinBox}>
               <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ color: "darkgrey", marginBottom: "7px" }}>Part of Portfolio</span>
+                <span>{findPartOfPortfolio().toFixed(2)}%</span>
+              </div>
+            </Box>
+            <Box sx={styles.coinBox}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ color: "darkgrey", marginBottom: "7px" }}>Current Price</span>
+                <span>{symbol} {coin?.market_data.current_price[currency.toLowerCase()].toFixed(2)}</span>
+              </div>
+            </Box>
+            <Box sx={styles.coinBox}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{display: "flex", alignItems: "center", justifyContent: "center", border: "3px solid darkgrey", borderRadius: "50%", width: "35px", height: "35px", marginBottom: "10px"}}>
+                  <span style={{color: "darkgrey", fontSize: "20px", fontWeight: "700"}}>
+                    {symbol}
+                  </span>
+                </div>
                 <span style={{ color: "darkgrey", marginBottom: "7px" }}>Total Profit/Lose</span>
-                <span>{numberWithCommas((actualTotalSum - sumCoinTransactions).toFixed(2))} $</span>
+                <span>{numberWithCommas((actualTotalSum - (coinInPortfolio[0]?.quantity * coinInPortfolio[0]?.midPrice * currencyRate)).toFixed(2))} {symbol}</span>
               </div>
               <div>
                   <span style={{...styles.changes, backgroundColor: countCoinChangePercentage > 0 ? "rgba(0, 255, 0, 0.3)" : "rgba(212, 8, 8, 0.3)"}}>{countCoinChangePercentage.toFixed(2)}%</span>
               </div>
             </Box>
+            <TradeWindow coin ={coin}/>
+            <Button sx={styles.button} onClick={deleteCoin}>
+              Delete
+            </Button>
           </div>
           <TableContainer sx={{width: "50%"}}>
             <Typography sx={{fontSize: "18px", fontWeight: "700"}}>
@@ -147,16 +211,16 @@ const PortfolioCoinPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {findTransactions.map((row) => (
+                {findTransactions.reverse().slice(0, page).map((row) => (
                   <TableRow
-                    key={row.name}
+                    key={row.date}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                   >
                     <TableCell component="th" scope="row">
                       <div style={{display: "flex", alignItems: "center"}}>
-                      <BsFillArrowDownCircleFill color='green' />
+                      <BsFillArrowDownCircleFill color={row.quantity > 0 ? "green" : "red"} />
                       <div style={{display: "flex", flexDirection: "column", marginLeft: "6px"}}>
-                        <span>Buy</span>
+                        <span>{row.quantity > 0 ? "Buy" : "Sell"}</span>
                         <span style={{color:"darkgrey"}}>{row.date}</span>
                       </div>
                       </div>
@@ -165,14 +229,19 @@ const PortfolioCoinPage = () => {
                       <span>{row.quantity.toFixed(4)}</span>
                       <span style={{color:"darkgrey"}} >{coin?.symbol.toUpperCase()}</span>
                     </TableCell>
-
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            {findTransactions.length > 5 && page < findTransactions.length && <Button variant="outlined"
+                                              onClick={() => setPage((page) => page + 5)} >
+                                              Next Transactions  
+                                            </Button>}
+            {page > 5 && <Button variant="outlined"
+                            onClick={() => setPage(5)}>
+                            Hide All
+                         </Button>}
           </TableContainer>
-
-
         </Container>
       </ThemeProvider>
     </>

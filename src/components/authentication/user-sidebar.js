@@ -7,7 +7,6 @@ import { CryptoState } from '../../crypto-context';
 import { Avatar, styled } from '@mui/material';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../firebase';
-import {AiFillDelete} from 'react-icons/ai'
 import { doc, setDoc } from 'firebase/firestore';
 import { useHistory } from 'react-router-dom';
 
@@ -22,9 +21,10 @@ const UserSidebar = () => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
-
+    console.log('toggleDrawer');
     setState({ ...state, [anchor]: open });
   };
+  
 
   const logOut = () => {
     signOut(auth)
@@ -34,6 +34,13 @@ const UserSidebar = () => {
       message: "Logout Successfull !"
     })
     toggleDrawer()
+  }
+  console.log(state);
+
+  function toPortfolio () {
+    setState({ ...state, right : false })
+    history.push('/portfolio')
+    
   }
 
   const removeFromWatchList = async (coin) => {
@@ -78,16 +85,14 @@ const UserSidebar = () => {
       wordWrap: "break-word"
     },
     profile: {
-      flex: "1",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       gap: "20px",
-      height: "92%"
     },
     picture: {
-      width: "200px",
-      height: "200px",
+      width: "80px",
+      height: "80px",
       cursor: "pointer",
       backgroundColor: "#EEBC1D",
       odjectFit: "contain"
@@ -97,34 +102,6 @@ const UserSidebar = () => {
       width: "100%",
       backgroundColor: "#EEBC1D",
       marginTop: "20px"
-    },
-    watchSpan: {
-      fontSize: "15px",
-      textShadow: "0 0 5px black"
-    },
-    watchlist: {
-      flex: "1",
-      width: "100%",
-      backgroundColor: "grey",
-      borderRadius: "10px",
-      padding: "15px",
-      paddingTop: "10px",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: "12px",
-      overflowY: "scroll"
-    },
-    coin: {
-      padding: "10px",
-      borderRadius: "5px",
-      color: "black",
-      width: "100%",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      backgroundColor: "#EEBC1D",
-      boxShadow: "0 0 3px black"
     }
   }
 
@@ -132,12 +109,19 @@ const UserSidebar = () => {
     <div>
         <React.Fragment>
           <Avatar
-            onClick={() => history.push("/portfolio")}
+            onClick={toggleDrawer('right',true)}
             sx={classes.avatar}
             src = {user.photoURL} 
             alt = {user.displayName || user.email}
              />
           <Drawer
+            sx={{
+              "& .MuiPaper-root": {
+                top: 65,
+                height: "500px",
+                width: "340px"
+              }
+            }}
             anchor={'right'}
             open={state['right']}
             onClose={toggleDrawer('right', false)}
@@ -148,32 +132,16 @@ const UserSidebar = () => {
                   sx={classes.picture}
                   src = {user.photoURL} 
                   alt = {user.displayName || user.email} />
-                  
                 <span style = {classes.name}>
                   {user.displayName || user.email}
                 </span>
-                <div style={classes.watchlist}>
-                  <span style={classes.watchSpan}>Watchlist</span>
-                  {
-                    coins.map((coin) => {
-                      if( true ) {
-                        return (
-                          <div style={classes.coin}>
-                            <span>{coin.name}</span>
-                            <span>
-                              {symbol}
-                              {numberWithCommas(coin.current_price.toFixed(2))}
-                              <AiFillDelete style={{cursor: "pointer"}}
-                                size={16}
-                                onClick={() => removeFromWatchList(coin)}/>
-                            </span>
-                          </div>
-                        )
-                      }
-                    })
-                  }
-                </div>
               </div>
+              <Button 
+                variant='contained'
+                sx={classes.logOut}
+                onClick={toPortfolio} >
+                  My Portfolio
+                </Button>
               <Button 
                 variant='contained'
                 sx={classes.logOut}
