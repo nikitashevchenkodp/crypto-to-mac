@@ -1,13 +1,11 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
 import { CryptoState } from '../../crypto-context';
 import { Avatar, styled } from '@mui/material';
 import { signOut } from 'firebase/auth';
-import { auth, db } from '../../firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { auth } from '../../firebase';
 import { useHistory } from 'react-router-dom';
 
 const UserSidebar = () => {

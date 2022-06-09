@@ -1,6 +1,6 @@
-import { Box, Button, InputAdornment, OutlinedInput, TextField, Typography } from '@mui/material';
+import { Box, Button, OutlinedInput, TextField, Typography } from '@mui/material';
 import { doc, setDoc } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react'
+import React, {useState } from 'react'
 import { countMidPrice } from '../../config/utils';
 import { CryptoState } from '../../crypto-context';
 import { db } from '../../firebase';
@@ -12,7 +12,6 @@ const classes = {
         color: "white"
     },
     box: {
-      padding: "3px",
       display: "flex",
       flexDirection: "column",
       gap: "20px",
@@ -33,10 +32,9 @@ const classes = {
   }
 
 const Buy = ({coin, handleClose}) => {
-    const {currency, user, watchlist, setAlert, transactions, currencyRate} = CryptoState()
+    const {currency, user, watchlist, setAlert, transactions} = CryptoState()
     const [count, setCount] = useState(0)
     const [base, setBase] = useState('USD')
-    let isNotUsd = currency !== "USD"
     console.log(coin);
     const toPortfolio = async () => {
         
@@ -62,7 +60,7 @@ const Buy = ({coin, handleClose}) => {
 
       const midPrice = countMidPrice(transactions,transactionToTransactions,coin)
 
-      const idx = watchlist.findIndex((elem) => elem.coin == coin.name)
+      const idx = watchlist.findIndex((elem) => elem.coin === coin.name)
       let newPortfolio = []
       if (idx > -1) {
           transactionToPortfolio = {
@@ -109,7 +107,7 @@ const Buy = ({coin, handleClose}) => {
         setCount(e.target.value)
     }
 
-    const total = base == 'USD'? (count / coin?.market_data.current_price[currency.toLowerCase()]) : (count * coin?.market_data.current_price[currency.toLowerCase()])
+    const total = base === 'USD'? (count / coin?.market_data.current_price[currency.toLowerCase()]) : (count * coin?.market_data.current_price[currency.toLowerCase()])
   
     return (
     <Box sx={classes.box}>
@@ -139,7 +137,7 @@ const Buy = ({coin, handleClose}) => {
         </TextField>
       </div>
       <Typography sx={{textAlign:"right"}} variant='subtitle'>
-            {total} <span style={classes.symbol}>{base == 'USD'? coin.symbol : currency}</span> 
+            {total} <span style={classes.symbol}>{base === 'USD'? coin.symbol : currency}</span> 
       </Typography>
 
       <Button

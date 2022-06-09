@@ -1,7 +1,7 @@
 import { Box, Button, OutlinedInput, TextField, Typography } from '@mui/material';
 import { doc, setDoc } from 'firebase/firestore';
 import React, { useState } from 'react'
-import CryptoContext, { CryptoState } from '../../crypto-context';
+import { CryptoState } from '../../crypto-context';
 import { db } from '../../firebase';
 
 
@@ -11,7 +11,6 @@ const classes = {
       color: "white"
   },
   box: {
-    padding: "3px",
     display: "flex",
     flexDirection: "column",
     gap: "20px",
@@ -53,10 +52,10 @@ const Sell = ({coin, handleClose}) => {
         date: new Date().toLocaleString(),
         type: 'sell'
       }
-      const idx = watchlist.findIndex((elem) => elem.coin == coin.name)
+      const idx = watchlist.findIndex((elem) => elem.coin === coin.name);
 
-      let newPortfolio = []
-      let transaction = {}
+      let newPortfolio = [];
+      let transaction = {};
       if (idx > -1) {
           transaction = {
               ...watchlist[idx],
@@ -101,7 +100,7 @@ const Sell = ({coin, handleClose}) => {
     const handleChange = (e) => {
       setCount(e.target.value)
     }
-    const total = base == 'USD'? (count / coin?.market_data.current_price[currency.toLowerCase()]) : (count * coin?.market_data.current_price[currency.toLowerCase()])
+    const total = base === 'USD'? (count / coin?.market_data.current_price[currency.toLowerCase()]) : (count * coin?.market_data.current_price[currency.toLowerCase()])
 
   return (
     <Box sx={classes.box}>
@@ -131,7 +130,7 @@ const Sell = ({coin, handleClose}) => {
         </TextField>
       </div>
       <Typography sx={{textAlign:"right"}} variant='subtitle'>
-            {total} <span style={classes.symbol}>{base == 'USD'? coin.symbol : currency}</span> 
+            {total} <span style={classes.symbol}>{base === 'USD'? coin.symbol : currency}</span> 
       </Typography>
 
       <Button

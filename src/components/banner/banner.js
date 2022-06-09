@@ -1,4 +1,4 @@
-import { Container, makeStyles, Typography } from '@mui/material'
+import { Container, Typography } from '@mui/material'
 import React from 'react'
 import './banner.css'
 import Carousel from './carousel'

@@ -1,4 +1,4 @@
-import { Box, Container, createTheme, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography } from '@mui/material'
+import { Box, Container, createTheme,Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min'
 import PieChart from '../../components/pie-chart'
@@ -18,12 +18,12 @@ const PortfolioPage = () => {
   const history = useHistory()
 
   useEffect(() => {
-    fetchCoins()
-  }, [currency])
+    fetchCoins();
+  }, [currency]);
 
   useEffect(() => {
-    setPortfolio(findPortfolio(watchlist, coins))
-  }, [watchlist, coins])
+    setPortfolio(findPortfolio(watchlist, coins));
+  }, [watchlist, coins]);
 
   const [percentage, different] = countPercentageChange(transactions, portfolio, currencyRate)
   const formatTotalSum = numberWithCommas(countTotalSum(portfolio, currencyRate).toFixed(2))
@@ -52,7 +52,7 @@ const PortfolioPage = () => {
     )
   }
 
-  if (watchlist.length == 0) {
+  if (watchlist.length === 0) {
     return (
       <div style={{textAlign: "center", marginTop: "150px"}}>
         <Typography variant='h3' sx={{fontWeight: "700", marginBottom: "20px"}} > Your Portfolio is Empty </Typography>

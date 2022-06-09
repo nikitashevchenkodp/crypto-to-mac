@@ -4,11 +4,9 @@ import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import Fade from '@mui/material/Fade';
 import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import { createTheme, Tab, Tabs, ThemeProvider } from '@mui/material';
 import Buy from './buy';
 import Sell from './sell';
-import { CryptoState } from '../../crypto-context';
 
 const styles = {
     style: {
@@ -85,8 +83,8 @@ const TradeWindow = ({coin}) => {
               <Tab sx={styles.tab} label="Buy"  />
               <Tab sx={styles.tab} label="Sell"  />
             </Tabs>
-            {value == 0 && <Buy coin = {coin} handleClose = {handleClose}/>}
-            {value == 1 && <Sell coin = {coin} handleClose = {handleClose} />}
+            {value === 0 && <Buy coin = {coin} handleClose = {handleClose}/>}
+            {value === 1 && <Sell coin = {coin} handleClose = {handleClose} />}
 
           </Box>
         </Fade>

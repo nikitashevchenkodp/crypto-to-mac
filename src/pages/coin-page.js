@@ -1,21 +1,18 @@
-import { LinearProgress, styled, Typography, Button } from '@mui/material'
+import { LinearProgress, styled, Typography } from '@mui/material'
 import React from 'react'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import CoinInfo from '../components/coin-info'
 import { SingleCoin } from '../config/api'
 import { CryptoState } from '../crypto-context'
-import {doc, setDoc} from 'firebase/firestore'
-import { db } from '../firebase'
 import TradeWindow from '../components/trade/trade-window'
 
 
 const CoinPage = () => {
 
   const {id} = useParams()
-  const {symbol, currency, user, watchlist, setAlert, currencyRate} = CryptoState()
+  const {symbol, user, currencyRate} = CryptoState()
   const [coin, setCoin] = useState()
-  const [loading, setLoading] = useState(false)
 
   const fetchCoin = async () => {
     const res = await fetch(SingleCoin(id))
@@ -23,51 +20,6 @@ const CoinPage = () => {
   }
   const inWatchList = true
 
-
-
-  const addToWatchlist = async () => {
-    const coinRef = doc(db, user?.uid, "portfolio");
-    try{
-      await setDoc(coinRef,
-        {coins: watchlist ? [...watchlist, coin] : [coin]})
-
-        setAlert({
-          open: true,
-          message: `${coin.name} Added to the Watchlist`,
-          type: "success"
-        })
-    } catch(error) {
-      setAlert({
-        open: true,
-        message: error.message,
-        type: "error"
-      })
-    }
-
-  }
-
-  const removeFromWatchList = async () => {
-    const coinRef = doc(db, user?.uid, "portfolio");
-
-    try{
-      await setDoc(coinRef,
-        {coins: watchlist.filter((watch) => watch !== coin?.id ) },
-        {merge: true})
-
-        setAlert({
-          open: true,
-          message: `${coin.name} Remover from the Watchlist`,
-          type: "success"
-        })
-    } catch(error) {
-      setAlert({
-        open: true,
-        message: error.message,
-        type: "error"
-      })
-    }
-
-  }
 
   useEffect(() => {
     fetchCoin()

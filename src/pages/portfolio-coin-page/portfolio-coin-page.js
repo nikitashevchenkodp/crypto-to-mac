@@ -1,5 +1,5 @@
 import { Button, Container, createTheme, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ThemeProvider, Typography } from '@mui/material'
-import { Box, width } from '@mui/system'
+import { Box } from '@mui/system'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { SingleCoin } from '../../config/api'

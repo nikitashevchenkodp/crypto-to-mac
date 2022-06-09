@@ -43,7 +43,6 @@ const SignUp = ({handleClose}) => {
 
   const classes = {
     box: {
-      padding: "3px",
       display: "flex",
       flexDirection: "column",
       gap: "20px",

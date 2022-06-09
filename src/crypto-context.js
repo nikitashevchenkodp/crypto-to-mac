@@ -1,6 +1,6 @@
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useContext } from 'react';
@@ -24,7 +24,6 @@ const CryptoContext = ({children}) => {
     message: "",
     type: "success"
   });
-  console.log("render");
   const [watchlist, setWatchlist] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [currencyRate, setCurrencyRate] = useState(1);
@@ -38,7 +37,6 @@ const CryptoContext = ({children}) => {
       const coinRef = doc(db, user?.uid, "portfolio");
       var unsubscribe = onSnapshot(coinRef, coin => {
         if(coin.exists()) {
-          console.log(coin.data().coins);
           setWatchlist(coin.data().coins);
           setLoading(false);
         } else {
@@ -61,7 +59,6 @@ const CryptoContext = ({children}) => {
       const coinRef = doc(db, user?.uid, "portfolio");
       var unsubscribe = onSnapshot(coinRef, trans => {
         if(trans.exists()) {
-          console.log(trans.data().transactions);
           setTransactions(trans.data().transactions);
         } else {
           console.log("Transactions list is empty");
