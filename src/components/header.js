@@ -41,7 +41,7 @@ const Header = () => {
               onClick = {() => history.push("/")} 
               sx={styles.title}
               variant = 'h5' >
-              Crypto Hunter
+              Crypro Tracker
             </Typography>
             <Select
               defaultValue={"USD"}
