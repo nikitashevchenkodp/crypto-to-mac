@@ -11,7 +11,7 @@ import UserSidebar from './authentication/user-sidebar';
 
 const Header = () => {
   const history = useHistory()
-  const {currency, setCurrency, user} = CryptoState()
+  const {setCurrency, user} = CryptoState()
 
   const styles = {
     title: {
@@ -65,4 +65,4 @@ const Header = () => {
   )
 }
 
-export default Header
+export default React.memo(Header)

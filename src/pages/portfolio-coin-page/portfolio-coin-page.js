@@ -10,6 +10,8 @@ import TradeWindow from '../../components/trade/trade-window'
 import { doc, setDoc } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { useHistory } from 'react-router-dom'
+import NotAutorized from '../../components/not-autorized'
+import Loader from '../../components/loader'
 
 const styles = {
   coinBox: {
@@ -66,12 +68,12 @@ const countCoinSum = (transactions, coin, currencyRate) => {
 
 const PortfolioCoinPage = () => {
   console.log("render");
-  const { watchlist, currency, transactions, currencyRate, symbol, coins, user, setAlert} = CryptoState()
-  const [coin, setCoin] = useState()
-  const [page, setPage] = useState(5)
-  const { id } = useParams()
+  const { watchlist, currency, transactions, currencyRate, symbol, coins, user, setAlert, loading} = CryptoState();
+  const [coin, setCoin] = useState();
+  const [page, setPage] = useState(5);
+  const { id } = useParams();
 
-  const history = useHistory()
+  const history = useHistory();
 
   const fetchCoin = async () => {
     const res = await fetch(SingleCoin(id))
@@ -79,54 +81,53 @@ const PortfolioCoinPage = () => {
   }
 
   useEffect(() => {
-    fetchCoin()
+    fetchCoin();
     console.log("fetch");
-  }, [currency])
+  }, [currency]);
 
   
 
-  const coinInPortfolio = watchlist.filter((watch) => watch.coin === coin?.name)
+  const coinInPortfolio = watchlist.filter((watch) => watch.coin === coin?.name);
   //Total sum of this coin i portfolio
-  const actualTotalSum = coinInPortfolio[0]?.quantity * (coin?.market_data.current_price['usd'] * currencyRate)
+  const actualTotalSum = coinInPortfolio[0]?.quantity * (coin?.market_data.current_price['usd'] * currencyRate);
 
   const findPartOfPortfolio = () => {
-    const total = countTotalSum(findPortfolio(watchlist, coins), currencyRate)
-    const res = (actualTotalSum / total) * 100 
-    return res
-  }
+    const total = countTotalSum(findPortfolio(watchlist, coins), currencyRate);
+    console.log(watchlist);
+    console.log(coins);
+    const res = (actualTotalSum / total) * 100 ;
+    return res;
+  };
 
-  const [sumCoinTransactions, findTransactions] = countCoinSum(transactions, coin, currencyRate)
+  const [sumCoinTransactions, findTransactions] = countCoinSum(transactions, coin, currencyRate);
   //Percentage change this coin in portfolio
-  const countCoinChangePercentage = (1 - ((coinInPortfolio[0]?.quantity * coinInPortfolio[0]?.midPrice * currencyRate) / actualTotalSum)) * 100
+  const countCoinChangePercentage = (1 - ((coinInPortfolio[0]?.quantity * coinInPortfolio[0]?.midPrice * currencyRate) / actualTotalSum)) * 100;
 
   const deleteCoin = async () => {
-    const newPortfolio = watchlist.filter((item) => item.id !== coin.id)
-    console.log(newPortfolio);
-    console.log(transactions);
-    const newTransactions = transactions.filter((item) => item.id !== coin.id)
-    console.log(newTransactions);
+    const newPortfolio = watchlist.filter((item) => item.id !== coin.id);
+    const newTransactions = transactions.filter((item) => item.id !== coin.id);
 
-    const coinRef = doc(db, user?.uid, "portfolio")
+    const coinRef = doc(db, user?.uid, "portfolio");
 
     try {
       await setDoc(coinRef,{
           coins: newPortfolio,
           transactions: newTransactions
-        })
+        });
         setAlert({
           open: true,
           message: `${coin.name} deleted from Portfolio`,
           type: "success"
-      })
-      history.push('/portfolio')
+      });
+      history.push('/portfolio');
     } catch(error) {
       setAlert({
         open: true,
         message: error,
         type: "error"
-      })
+      });
     }
-  }
+  };
 
   const darkTheme = createTheme({
     palette: {
@@ -135,9 +136,17 @@ const PortfolioCoinPage = () => {
       },
       mode: "dark"
     },
-  })
+  });
 
-  console.log(coin?.market_data.price_change_percentage_24h.toFixed(2));
+  if(loading) {
+    return <Loader />
+  }
+
+  if(!user) {
+    return (
+      <NotAutorized />
+    )
+  }
 
   return (
     <>

@@ -29,17 +29,23 @@ const PieChart = () => {
       width={130}
       height={50}
       options={{
-        title: {
-          display: true,
-          text: "COVID-19 Cases of Last 3 Months",
-          fontSize: 15,
-          
-        }, 
+        animation: {
+          animateScale: true
+        } ,
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: "Part of each coin in Your Portfolio",
+            fontSize: 15,
+          },
+          legend: {
+            display: true, 
+            position: "top",
+            align: 'center',
+          }
+        },
         maintainAspectRatio: false ,
-        legend: {
-          display: true, //Is the legend shown?
-          position: "right" //Position of the legend.
-        }
       }}
       data={pieChartData}
     />

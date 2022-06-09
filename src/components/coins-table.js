@@ -8,8 +8,8 @@ import { CryptoState } from '../crypto-context'
 
 const CoinsTable = () => {
 
-  const {currency, symbol, coins, loading, fetchCoins, currencyRate} = CryptoState()
-  const history = useHistory()
+  const {currency, symbol, coins, loading, fetchCoins, currencyRate} = CryptoState();
+  const history = useHistory();
 
 
   const [search, setSearch] = useState('')
@@ -20,10 +20,8 @@ const CoinsTable = () => {
   }
 
   const convertingCoins = (coins, currencyRate) => {
-    return coins.map((coin) => coin = {...coin, current_price: coin.current_price * currencyRate})
-  }
-
-  console.log(convertingCoins(coins, currencyRate));
+    return coins.map((coin) => coin = {...coin, current_price: coin.current_price * currencyRate});
+  };
   
   const classes = {
     container: {
@@ -143,7 +141,6 @@ const CoinsTable = () => {
                   {handleSearch().slice((page-1) * 10, (page-1) * 10 + 10)
                                     .map(row => {
                     const profit = row.price_change_percentage_24h > 0;
-                    console.log(row.name,row.price_change_percentage_24h);
 
                     return (
                       <TableRow

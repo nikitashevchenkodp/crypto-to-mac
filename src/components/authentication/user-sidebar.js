@@ -15,7 +15,7 @@ const UserSidebar = () => {
     right: false,
   });
   const history = useHistory()
-  const {user, setAlert, watchlist, coins, symbol} = CryptoState()
+  const {user, setAlert} = CryptoState()
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -43,32 +43,6 @@ const UserSidebar = () => {
     
   }
 
-  const removeFromWatchList = async (coin) => {
-    const coinRef = doc(db, user.uid, "portfolio");
-
-    try{
-      await setDoc(coinRef,
-        {coins: watchlist.filter((watch) => watch !== coin?.id ) },
-        {merge: true})
-
-        setAlert({
-          open: true,
-          message: `${coin.name} Remover from the Watchlist`,
-          type: "success"
-        })
-    } catch(error) {
-      setAlert({
-        open: true,
-        message: error.message,
-        type: "error"
-      })
-    }
-
-  }
-
-  const numberWithCommas = (x) => {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
 
   const classes = {
     avatar: {
@@ -88,17 +62,16 @@ const UserSidebar = () => {
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      gap: "20px",
     },
     picture: {
-      width: "80px",
-      height: "80px",
+      width: "65px",
+      height: "65px",
       cursor: "pointer",
       backgroundColor: "#EEBC1D",
       odjectFit: "contain"
     },
     logOut: {
-      height: "8%",
+      height: "30px",
       width: "100%",
       backgroundColor: "#EEBC1D",
       marginTop: "20px"
@@ -107,7 +80,6 @@ const UserSidebar = () => {
 
   return (
     <div>
-        <React.Fragment>
           <Avatar
             onClick={toggleDrawer('right',true)}
             sx={classes.avatar}
@@ -118,8 +90,8 @@ const UserSidebar = () => {
             sx={{
               "& .MuiPaper-root": {
                 top: 65,
-                height: "500px",
-                width: "340px"
+                height: "280px",
+                width: "340px",
               }
             }}
             anchor={'right'}
@@ -150,17 +122,16 @@ const UserSidebar = () => {
                 </Button>
             </MainRoot>
           </Drawer>
-        </React.Fragment>
     </div>
   );
 }
 
 const MainRoot = styled('div')(({theme}) => ({
-  width: "350px",
   height: "100%",
   display: "flex",
+  justifyContent: "center",
   flexDirection: "column",
-  padding: "25px",
+  padding: "0 25px",
 }))
 
 export default UserSidebar

@@ -7,11 +7,13 @@ import { countPercentageChange, countTotalSum, findPortfolio, numberWithCommas }
 import { CryptoState } from '../../crypto-context'
 import { classes } from './portfolio-page-styles'
 import {BsBriefcase} from 'react-icons/bs'
+import NotAutorized from '../../components/not-autorized'
+import Loader from '../../components/loader'
 
 
 const PortfolioPage = () => {
 
-  const { watchlist, coins, symbol, loading, currencyRate, transactions, fetchCoins, currency } = CryptoState()
+  const { watchlist, coins, symbol, loading, currencyRate, transactions, fetchCoins, currency, user } = CryptoState()
   const [portfolio, setPortfolio] = useState([])
   const history = useHistory()
 
@@ -36,14 +38,30 @@ const PortfolioPage = () => {
     },
   })
 
+  if(loading) {
+    return (
+      <div style={{textAlign: "center"}}>
+        <Loader />
+      </div>
+    )
+  }
+
+  if(!user) {
+    return (
+      <NotAutorized />
+    )
+  }
+
   if (watchlist.length == 0) {
     return (
       <div style={{textAlign: "center", marginTop: "150px"}}>
-        <Typography variant='h3' sx={{fontWeight: "700", marginBottom: "20px"}}>Your Portfolio is Empty</Typography>
+        <Typography variant='h3' sx={{fontWeight: "700", marginBottom: "20px"}} > Your Portfolio is Empty </Typography>
         <BsBriefcase size={200} color={"gold"}/>
       </div>
     )
   }
+
+  
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -79,10 +97,6 @@ const PortfolioPage = () => {
           </div>
         </div>
         <TableContainer>
-          {
-            loading ? (
-              <LinearProgress sx={classes.loader} />
-            ) : (
               <Table>
                 <TableHead sx={classes.tableHead}>
                   <TableRow>
@@ -143,15 +157,13 @@ const PortfolioPage = () => {
                           <span style={{
                             color: isProfit ? "rgb(14, 203, 129)" : "red",
                             fontWeight: 500,
-                          }}>{isProfit ? `+${((1 - ((row.midPrice * currencyRate) / (row.current_price * currencyRate))) * 100).toFixed(2)}` : `${((1 - ((row.midPrice * currencyRate) / (row.current_price * currencyRate))) * 100).toFixed(2)}`}</span>
+                          }}>{isProfit ? `+${((1 - ((row.midPrice * currencyRate) / (row.current_price * currencyRate))) * 100).toFixed(2)}` : ((1 - ((row.midPrice * currencyRate) / (row.current_price * currencyRate))) * 100).toFixed(2)}</span>
                         </TableCell>
                       </TableRow>
                     )
                   })}
                 </TableBody>
               </Table>
-            )
-          }
         </TableContainer>
       </Container>
     </ThemeProvider>

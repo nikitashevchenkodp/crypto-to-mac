@@ -75,8 +75,8 @@ const AuthModal = () => {
   }
 
   const handleChange = (event, newValue) => {
-    setValue(newValue)
-  }
+    setValue(newValue);
+  };
   console.log(value);
   return (
     <div>
